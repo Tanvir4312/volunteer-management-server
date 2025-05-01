@@ -29,6 +29,14 @@ app.post('/add-volunteer', async(req, res) =>{
   res.send(result)
 })
 
+// volunteer Data get with sort
+app.get('/get-volunteer', async(req, res) =>{
+  
+
+
+  const result = await volunteerCollection.find().sort({'date': 1}).toArray()
+  res.send(result)
+})
 
 
 
