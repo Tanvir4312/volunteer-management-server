@@ -40,8 +40,21 @@ async function run() {
         .find()
         .sort({ date: 1 })
         .toArray();
-      res.send(result);
+      res.send(result); 
     });
+
+    // get volunteer data with search
+    app.get('/volunteer-data', async(req, res) =>{
+      const search = req.query.search;
+      let query = {
+        postTitle: {
+          $regex: search,
+          $options: 'i'
+        }
+      }
+      const result = await volunteerCollection.find(query).toArray()
+      res.send(result)
+    })
 
     // Volunteer get by id
     app.get("/volunteer-get/:id", async (req, res) => {
