@@ -131,6 +131,26 @@ async function run() {
       res.send(result)
     })
 
+    // get my request data from Volunteer Request Collection
+    app.get('/my-request-posts/:email', async(req, res) =>{
+      const email = req.params.email
+      const query = {
+        volunteer_email: email
+      }
+      const result = await volunteerRequestCollection.find(query).toArray()
+      res.send(result)
+    })
+
+     // My request data cancel
+     app.delete('/my-request-data-cancel/:id', async(req, res) =>{
+      const id = req.params.id
+      const query = {
+        _id: new ObjectId(id)
+      }
+      const result = await volunteerRequestCollection.deleteOne(query)
+      res.send(result)
+    })
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
