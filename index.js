@@ -40,21 +40,21 @@ async function run() {
         .find()
         .sort({ date: 1 })
         .toArray();
-      res.send(result); 
+      res.send(result);
     });
 
     // get volunteer data with search
-    app.get('/volunteer-data', async(req, res) =>{
+    app.get("/volunteer-data", async (req, res) => {
       const search = req.query.search;
       let query = {
         postTitle: {
           $regex: search,
-          $options: 'i'
-        }
-      }
-      const result = await volunteerCollection.find(query).toArray()
-      res.send(result)
-    })
+          $options: "i",
+        },
+      };
+      const result = await volunteerCollection.find(query).toArray();
+      res.send(result);
+    });
 
     // Volunteer get by id
     app.get("/volunteer-get/:id", async (req, res) => {
@@ -89,7 +89,35 @@ async function run() {
           noOfVolunteersNeeded: -1,
         },
       };
-      const updated = await volunteerCollection.updateOne(filter, update)
+      const updated = await volunteerCollection.updateOne(filter, update);
+      res.send(result);
+    });
+
+    // get my posts data from from volunteer-collection by email
+    app.get("/my-posts/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = {
+        email,
+      };
+      const result = await volunteerCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // volunteer data update
+    app.put("/update-data/:id", async (req, res) => {
+      const id = req.params.id;
+      const volunteerData = req.body;
+
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: volunteerData,
+      };
+      const result = await volunteerCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
 
