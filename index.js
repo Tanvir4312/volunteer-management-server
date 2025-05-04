@@ -7,31 +7,36 @@ const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 
-app.use(cors({
-  origin:['http://localhost:5173'],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      'https://volunteer-management-39ddb.web.app',
+      'https://volunteer-management-39ddb.firebaseapp.com'
+     
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
 // Verify
-const verifyToken = async(req, res, next) =>{
-const token = req.cookies.token
+const verifyToken = async (req, res, next) => {
+  // const token = req.cookies.token;
 
-if(!token){
-  return res.status(401).send({message: 'Unauthorized access'})
-}
-jwt.verify(token, process.env.ACCESS_TOKEN_SECRET,(err, decoded) =>{
-  if(err){
-    return res.status(401).send({message: 'Unauthorized access'})
-  }
-  else{
-    req.user = decoded
-  }
-} )
-  next()
-}
-
+  // if (!token) {
+  //   return res.status(401).send({ message: "Unauthorized access" });
+  // }
+  // jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  //   if (err) {
+  //     return res.status(401).send({ message: "Unauthorized access" });
+  //   } else {
+  //     req.user = decoded;
+  //   }
+  // });
+  next();
+};
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.h2tkvzo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -68,26 +73,26 @@ async function run() {
     });
 
     // Jwt token remove by logout
-    app.get('/jwt-logout', async(req, res) =>{
+    app.get("/jwt-logout", async (req, res) => {
       res
-      .clearCookie('token',{
-        maxAge: 0,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      })
-      .send({success: true})
-    })
+        .clearCookie("token", {
+          maxAge: 0,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        })
+        .send({ success: true });
+    });
 
     // Volunteer add post
-    app.post("/add-volunteer", verifyToken, async (req, res) => {
+    app.post("/add-volunteer",  async (req, res) => {
       const data = req.body;
-   
+
       const result = await volunteerCollection.insertOne(data);
       res.send(result);
     });
 
     // volunteer Data get with sort
-    app.get("/get-volunteer", verifyToken, async (req, res) => {
+    app.get("/get-volunteer", async (req, res) => {
       const result = await volunteerCollection
         .find()
         .sort({ date: 1 })
@@ -109,7 +114,7 @@ async function run() {
     });
 
     // Volunteer get by id
-    app.get("/volunteer-get/:id", verifyToken, async (req, res) => {
+    app.get("/volunteer-get/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await volunteerCollection.findOne(query);
@@ -146,13 +151,13 @@ async function run() {
     });
 
     // get my posts data from from volunteer-collection by email
-    app.get("/my-posts/:email", verifyToken, async (req, res) => {
+    app.get("/my-posts/:email", async (req, res) => {
       const email = req.params.email;
-      const decodedEmail = req.user.email
+      // const decodedEmail = req.user.email;
 
-      if(decodedEmail !== email){
-        return res.status(403).send({message: 'Forbidden'})
-      }
+      // if (decodedEmail !== email) {
+      //   return res.status(403).send({ message: "Forbidden" });
+      // }
       const query = {
         email,
       };
@@ -161,7 +166,7 @@ async function run() {
     });
 
     // volunteer data update
-    app.put("/update-data/:id", verifyToken, async (req, res) => {
+    app.put("/update-data/:id", async (req, res) => {
       const id = req.params.id;
       const volunteerData = req.body;
 
@@ -186,14 +191,14 @@ async function run() {
       };
       const result = await volunteerCollection.deleteOne(query);
       res.send(result);
-    }); 
+    });
 
     // get my request data by email from Volunteer Request Collection
-    app.get("/my-request-posts/:email", verifyToken, async (req, res) => {
+    app.get("/my-request-posts/:email", async (req, res) => {
       const email = req.params.email;
-      if(decodedEmail !== email){
-        return res.status(403).send({message: 'Forbidden'})
-      }
+      // if (decodedEmail !== email) {
+      //   return res.status(403).send({ message: "Forbidden" });
+      // }
       const query = {
         volunteer_email: email,
       };
@@ -202,7 +207,7 @@ async function run() {
     });
 
     // My request data cancel
-    app.delete("/my-request-data-cancel/:id",  async (req, res) => {
+    app.delete("/my-request-data-cancel/:id", async (req, res) => {
       const id = req.params.id;
       const query = {
         _id: new ObjectId(id),
@@ -212,9 +217,9 @@ async function run() {
     });
 
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
